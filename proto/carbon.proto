@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package carbon;
+
+service System {
+    rpc GetInformation (InformationRequest) returns (InformationReply) {}
+}
+
+message InformationRequest {}
+
+message InformationReply {
+    int32 uptime = 1; 
+}
