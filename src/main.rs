@@ -1,36 +1,32 @@
 use std::net::SocketAddr;
-use std::str::FromStr;
-use carbon::system_server::{System, SystemServer};
-use carbon::{InformationRequest, InformationReply};
-use tonic::transport::Server;
-use tonic::{Request, Result, Response, Status};
 
-pub mod carbon {
-    tonic::include_proto!("carbon");
-}
+use axum::{Router, Server};
+use log::{info, error};
 
-#[derive(Default)]
-struct SystemService {}
-
-#[tonic::async_trait]
-impl System for SystemService {
-    async fn get_information(&self, _request: Request<InformationRequest>) -> Result<Response<InformationReply>, Status> {
-        println!("Got a request!");
-        
-        let reply = InformationReply {
-            uptime: 0,
-        };
-        
-        Ok(Response::new(reply))
-    }
-}
+mod routes;
+mod server;
 
 #[tokio::main]
-
 async fn main() {
-    Server::builder()
-        .add_service(SystemServer::new(SystemService::default()))
-        .serve(SocketAddr::from_str("0.0.0.0:3000").unwrap())
+    env_logger::init();
+
+    let manager = server::Manager::new();
+
+    info!("Initializing server manager...");
+    manager.initialize().unwrap_or_else(|err| {
+        error!("Failed to initialize server manager: {}", err);
+    });
+
+    let router = Router::new()
+        .nest("/system", routes::system::routing());
+
+    info!("Starting HTTP server...");
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+
+    Server::bind(&addr)
+        .serve(router.into_make_service())
         .await
-        .unwrap();
+        .unwrap_or_else(|err| {
+            error!("Failed to start HTTP server: {}", err);
+        });
 }
