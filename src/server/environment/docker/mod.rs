@@ -1,7 +1,7 @@
-use super::{Environment, Configuration};
-use anyhow::{Result, anyhow};
+use super::{Configuration, Environment};
+use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use bollard::{Docker, network::{InspectNetworkOptions}, errors::Error::DockerResponseServerError};
+use bollard::{errors::Error::DockerResponseServerError, network::InspectNetworkOptions, Docker};
 
 pub struct DockerEnvironment {
     config: Configuration,
@@ -19,9 +19,16 @@ impl DockerEnvironment {
     }
 
     async fn configure_network(&self) -> Result<()> {
-        match self.docker.inspect_network("carbon_nw", Some(InspectNetworkOptions::<&str> {
-             ..Default::default()
-        })).await {
+        match self
+            .docker
+            .inspect_network(
+                "carbon_nw",
+                Some(InspectNetworkOptions::<&str> {
+                    ..Default::default()
+                }),
+            )
+            .await
+        {
             Ok(..) => Ok(()),
             Err(error) => match error {
                 DockerResponseServerError { status_code, .. } => {
@@ -30,7 +37,7 @@ impl DockerEnvironment {
                     }
 
                     Ok(())
-                },
+                }
                 _ => Err(anyhow!(error)),
             },
         }

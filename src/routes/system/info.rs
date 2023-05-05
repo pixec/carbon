@@ -7,9 +7,7 @@ pub struct Info {
 }
 
 pub async fn info() -> (StatusCode, Json<Info>) {
-    let info = Info {
-        uptime: 0,
-    };
+    let info = Info { uptime: 0 };
 
     (StatusCode::OK, Json(info))
 }

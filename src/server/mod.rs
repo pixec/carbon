@@ -1,5 +1,5 @@
-mod manager;
 mod environment;
+mod manager;
 
-pub use manager::Manager;
 pub use environment::Environment;
+pub use manager::Manager;

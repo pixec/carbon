@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use axum::{Router, Server};
-use log::{info, error};
+use log::{error, info};
 
 mod routes;
 mod server;
@@ -17,8 +17,7 @@ async fn main() {
         error!("Failed to initialize server manager: {}", err);
     });
 
-    let router = Router::new()
-        .nest("/system", routes::system::routing());
+    let router = Router::new().nest("/system", routes::system::routing());
 
     info!("Starting HTTP server...");
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
