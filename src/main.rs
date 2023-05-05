@@ -1,7 +1,6 @@
-use std::net::SocketAddr;
-
 use axum::{Router, Server};
 use log::{error, info};
+use std::net::SocketAddr;
 
 mod routes;
 mod server;

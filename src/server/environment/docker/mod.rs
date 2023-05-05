@@ -1,7 +1,12 @@
 use super::{Configuration, Environment};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use bollard::{errors::Error::DockerResponseServerError, network::InspectNetworkOptions, Docker};
+use bollard::{
+    errors::Error::DockerResponseServerError,
+    network::{CreateNetworkOptions, InspectNetworkOptions},
+    service::{Ipam, IpamConfig},
+    Docker,
+};
 
 pub struct DockerEnvironment {
     config: Configuration,
@@ -33,7 +38,28 @@ impl DockerEnvironment {
             Err(error) => match error {
                 DockerResponseServerError { status_code, .. } => {
                     if status_code == 404 {
-                        // TODO: Create Docker network if not found.
+                        self.docker
+                            .create_network(CreateNetworkOptions::<&str> {
+                                name: "carbon_nw",
+                                driver: "bridge",
+                                ipam: Ipam {
+                                    config: Some(vec![
+                                        IpamConfig {
+                                            subnet: Some("172.18.0.0/16".to_string()),
+                                            gateway: Some("172.18.0.1".to_string()),
+                                            ..Default::default()
+                                        },
+                                        IpamConfig {
+                                            subnet: Some("fdba:17c8:6c94::/64".to_string()),
+                                            gateway: Some("fdba:17c8:6c94::1011".to_string()),
+                                            ..Default::default()
+                                        },
+                                    ]),
+                                    ..Default::default()
+                                },
+                                ..Default::default()
+                            })
+                            .await?;
                     }
 
                     Ok(())
