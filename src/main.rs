@@ -9,7 +9,7 @@ mod server;
 async fn main() {
     env_logger::init();
 
-    let manager = server::Manager::new();
+    let mut manager = server::Manager::new();
 
     info!("Initializing server manager...");
     manager.initialize().unwrap_or_else(|err| {
