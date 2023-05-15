@@ -16,10 +16,10 @@ impl Manager {
         Ok(())
     }
 
-    pub fn find_mut(&mut self, uuid: String) -> Result<&mut Server> {
+    pub fn find(&self, uuid: String) -> Result<&Server> {
         self.servers
-            .iter_mut()
-            .find(|server| server.uuid() == uuid)
+            .iter()
+            .find(|server| server.config().uuid() == uuid)
             .ok_or(anyhow!("server not found"))
     }
 }

@@ -171,6 +171,7 @@ dependencies = [
  "bollard",
  "env_logger",
  "log",
+ "parking_lot",
  "serde",
  "tokio",
 ]

@@ -1,14 +1,17 @@
-use super::environment::Configuration;
+use super::environment::Configuration as EnvironmentConfiguration;
 use crate::server::environment::DockerEnvironment;
+use crate::server::Configuration;
 use crate::server::Environment;
 use crate::server::Filesystem;
 use anyhow::Result;
+use parking_lot::Mutex;
+use parking_lot::MutexGuard;
 
 #[derive(Debug)]
 pub struct Server {
-    uuid: String,
-    environment: Box<dyn Environment>,
-    filesystem: Filesystem,
+    configuration: Mutex<Configuration>,
+    pub environment: Box<dyn Environment>,
+    pub filesystem: Filesystem,
 }
 
 pub enum Power {
@@ -20,18 +23,14 @@ pub enum Power {
 impl Server {
     pub fn new() -> Result<Self> {
         Ok(Self {
-            uuid: String::from("S O O N"),
-            environment: Box::new(DockerEnvironment::new(Configuration {})?),
+            configuration: Mutex::new(Configuration::new("SOON".to_string())),
+            environment: Box::new(DockerEnvironment::new(EnvironmentConfiguration {})?),
             filesystem: Filesystem::new(),
         })
     }
 
-    pub fn uuid(&self) -> String {
-        self.uuid.clone()
-    }
-
-    pub fn set_uuid(&mut self, uuid: String) {
-        self.uuid = uuid;
+    pub fn config(&self) -> MutexGuard<Configuration> {
+        self.configuration.lock()
     }
 
     pub async fn handle_power(&self, power: Power) -> Result<()> {
